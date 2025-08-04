@@ -6,10 +6,12 @@ import api.giybat.uz.dto.RegistrationDTO;
 import api.giybat.uz.dto.SmsVerificationDTO;
 import api.giybat.uz.entity.ProfileEntity;
 import api.giybat.uz.enums.GeneralStatus;
+import api.giybat.uz.enums.ProfileRole;
 import api.giybat.uz.exp.AppBadException;
 import api.giybat.uz.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,6 +22,9 @@ public class AuthService {
 
     private final ProfileRepository profileRepository;
     private final ProfileRoleService profileRoleService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final EmailSenderService emailSenderService;
+    private final SmsSenderService smsSenderService;
 
     @SneakyThrows
     public String registration(RegistrationDTO dto) {
@@ -39,22 +44,20 @@ public class AuthService {
         profile.setName(dto.getName());
         profile.setUsername(dto.getUsername());
         profile.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
-        profile.setVisible(true);
-        profile.setStatus(ProfileStatus.NOT_ACTIVE);
+        profile.setStatus(GeneralStatus.INACTIVE);
         profileRepository.save(profile);
         // create profile roles
-        profileRoleService.create(profile.getId(), ProfileRoleEnum.ROLE_USER);
+        profileRoleService.create(profile.getId(), ProfileRole.USER);
         // send verification code
-        // send()
-        /*if (profile.getUsername().contains("@")) { // email va phone ga tekshirishni o'zgartirsa bo'ladi.
+        if (profile.getUsername().contains("@")) { // email va phone ga tekshirishni o'zgartirsa bo'ladi.
             // Email Send
-            emailSenderService.sendRegistrationStyledEmail(profile.getUsername());
+            emailSenderService.sendRegistration(profile.getUsername());
         } else {
             // SMS Send
             smsSenderService.sendRegistrationSMS(profile.getUsername());
-        }*/
+        }
         // response
-        return "Tastiqlash kodi ketdi mazgi qara.";
+        return "Verification code sent";
     }
 
     public String emailVerification(String token) {
