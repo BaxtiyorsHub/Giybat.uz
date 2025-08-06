@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class ProfileRoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter(AccessLevel.NONE)
     private String id;
 
     @Column(name = "profile_id")

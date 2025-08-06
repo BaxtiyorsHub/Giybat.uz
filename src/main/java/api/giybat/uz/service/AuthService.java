@@ -29,6 +29,10 @@ public class AuthService {
     @SneakyThrows
     public String registration(RegistrationDTO dto) {
         // check
+        if (!dto.getUsername().isBlank() && dto.getUsername().contains("@")) {
+            return emailSenderService.sendRegistration(dto.getUsername());
+        }
+
         Optional<ProfileEntity> existOptional = profileRepository.findByUsernameAndVisibleIsTrue(dto.getUsername());
         if (existOptional.isPresent()) {
             ProfileEntity existsProfile = existOptional.get();
