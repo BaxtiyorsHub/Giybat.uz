@@ -1,5 +1,5 @@
 package api.giybat.uz.enums;
 
 public enum GeneralStatus {
-    ACTIVE, INACTIVE, DELETED
+    ACTIVE, INACTIVE, DELETED, BLOCKED
 }

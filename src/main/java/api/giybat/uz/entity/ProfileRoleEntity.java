@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class ProfileRoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter(AccessLevel.NONE)
     private String id;
 
     @Column(name = "profile_id")
@@ -24,7 +25,7 @@ public class ProfileRoleEntity {
     @ManyToOne
     private ProfileEntity profile;
 
-    @Column(name = "role")
+    @Column(name = "roles")
     @Enumerated(EnumType.STRING)
     private ProfileRole role;
 
