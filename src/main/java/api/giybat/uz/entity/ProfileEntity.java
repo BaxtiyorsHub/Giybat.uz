@@ -2,9 +2,8 @@ package api.giybat.uz.entity;
 
 import api.giybat.uz.enums.GeneralStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -13,6 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProfileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -39,4 +40,11 @@ public class ProfileEntity {
     @CreationTimestamp
     @Setter(AccessLevel.NONE)
     private LocalDateTime createdDate;
+
+    public ProfileEntity(String name,String username,String password, GeneralStatus status){
+        this.name=name;
+        this.status=status;
+        this.username=username;
+        this.password=password;
+    }
 }
