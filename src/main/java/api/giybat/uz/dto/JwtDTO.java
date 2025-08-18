@@ -12,7 +12,7 @@ import lombok.*;
 @RequiredArgsConstructor
 public class JwtDTO {
     @NonNull
-    private String phone;
+    private String username;
     @NonNull
     private String code;
     private ProfileRole role;

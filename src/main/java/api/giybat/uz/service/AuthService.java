@@ -1,14 +1,14 @@
 package api.giybat.uz.service;
 
-import api.giybat.uz.dto.AuthorizationDTO;
-import api.giybat.uz.dto.ProfileDTO;
-import api.giybat.uz.dto.RegistrationDTO;
-import api.giybat.uz.dto.SmsVerificationDTO;
+import api.giybat.uz.dto.*;
 import api.giybat.uz.entity.ProfileEntity;
 import api.giybat.uz.enums.GeneralStatus;
 import api.giybat.uz.enums.ProfileRole;
 import api.giybat.uz.exp.AppBadException;
 import api.giybat.uz.repository.ProfileRepository;
+import api.giybat.uz.service.emailServices.EmailHistoryService;
+import api.giybat.uz.service.emailServices.EmailSenderService;
+import api.giybat.uz.utils.JwtUtil;
 import api.giybat.uz.utils.PhoneCheck;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -26,6 +26,7 @@ public class AuthService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailSenderService emailSenderService;
     private final SmsSenderService smsSenderService;
+    private final EmailHistoryService emailHistoryService;
 
     @SneakyThrows
     public String registration(RegistrationDTO dto) {
@@ -63,15 +64,32 @@ public class AuthService {
         if (profile.getUsername().contains("@")) { // email va phone ga tekshirishni o'zgartirsa bo'ladi.
             // Email Send
             return emailSenderService.sendRegistration(profile.getUsername());
-        } else if (PhoneCheck.normalize(dto.getUsername()).startsWith("+998")){
+        } else if (PhoneCheck.normalize(dto.getUsername()).startsWith("+998")) {
             // SMS Send
             return smsSenderService.sendRegistrationSMS(profile.getUsername());
         }
         throw new AppBadException("Something went wrong");
     }
 
+    @SneakyThrows
     public String emailVerification(String token) {
-        return null;
+        if (token.isBlank()) throw new AppBadException("Wrong token, something went wrong");
+
+        JwtDTO jwtDTO = JwtUtil.decode(token);
+
+        Optional<ProfileEntity> dbEntity = profileRepository.findByUsernameAndVisibleIsTrue(jwtDTO.getUsername());
+
+        if (dbEntity.isPresent()) {
+            ProfileEntity profileEntity = dbEntity.get();
+            if (profileEntity.getStatus().equals(GeneralStatus.INACTIVE)
+                    && emailHistoryService.isSmsValid(jwtDTO.getUsername(), jwtDTO.getCode())) {
+
+                profileEntity.setStatus(GeneralStatus.ACTIVE);
+                profileRepository.save(profileEntity);
+                return "Registration completed";
+            }
+        }
+        throw new AppBadException("Verification failed");
     }
 
     public String smsVerification(SmsVerificationDTO dto) {
