@@ -1,4 +1,4 @@
-package api.giybat.uz.service;
+package api.giybat.uz.service.emailServices;
 
 import api.giybat.uz.dto.EmailHistoryDTO;
 import api.giybat.uz.entity.EmailHistoryEntity;
@@ -36,10 +36,7 @@ public class EmailHistoryService {
         //  20:32:40           =   20:30.40  + 0:2:00
         LocalDateTime extDate = entity.getCreatedDate().plusMinutes(2);
         // now  20:31:30  >  20:32:40    |     now 20:35:30  >  20:32:40
-        if (LocalDateTime.now().isAfter(extDate)) {
-            return false;
-        }
-        return true;
+        return !LocalDateTime.now().isAfter(extDate);
     }
 
     public List<EmailHistoryDTO> getEmailHistoryByEmail(String email) {

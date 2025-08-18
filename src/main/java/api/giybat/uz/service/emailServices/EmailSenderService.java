@@ -1,5 +1,6 @@
-package api.giybat.uz.service;
+package api.giybat.uz.service.emailServices;
 
+import api.giybat.uz.repository.EmailHistoryRepository;
 import api.giybat.uz.utils.JwtUtil;
 import api.giybat.uz.utils.RandomUtil;
 import jakarta.mail.MessagingException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmailSenderService {
 
+    private final EmailHistoryRepository emailHistoryRepository;
     @Value("${spring.mail.username}")
     private String fromAccount;
     @Value("${server.url}")
@@ -71,5 +73,4 @@ public class EmailSenderService {
             throw new RuntimeException(e);
         }
     }
-
 }

@@ -1,4 +1,4 @@
-package api.giybat.uz.entity;
+package api.giybat.uz.entity.profileEntities;
 
 import api.giybat.uz.enums.ProfileRole;
 import jakarta.persistence.*;
