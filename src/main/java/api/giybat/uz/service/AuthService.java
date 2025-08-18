@@ -1,15 +1,17 @@
 package api.giybat.uz.service;
 
 import api.giybat.uz.dto.*;
-import api.giybat.uz.entity.ProfileEntity;
+import api.giybat.uz.entity.profileEntities.ProfileEntity;
 import api.giybat.uz.enums.GeneralStatus;
 import api.giybat.uz.enums.ProfileRole;
 import api.giybat.uz.exp.AppBadException;
 import api.giybat.uz.repository.ProfileRepository;
 import api.giybat.uz.service.emailServices.EmailHistoryService;
 import api.giybat.uz.service.emailServices.EmailSenderService;
+import api.giybat.uz.service.smsServices.SmsHistoryService;
 import api.giybat.uz.utils.JwtUtil;
 import api.giybat.uz.utils.PhoneCheck;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,6 +29,7 @@ public class AuthService {
     private final EmailSenderService emailSenderService;
     private final SmsSenderService smsSenderService;
     private final EmailHistoryService emailHistoryService;
+    private final SmsHistoryService smsHistoryService;
 
     @SneakyThrows
     public String registration(RegistrationDTO dto) {
@@ -92,11 +95,31 @@ public class AuthService {
         throw new AppBadException("Verification failed");
     }
 
-    public String smsVerification(SmsVerificationDTO dto) {
-        return null;
+    @SneakyThrows
+    public String smsVerification(@Valid SmsVerificationDTO dto) {
+        if (smsHistoryService.isValidSms(dto.getSmsCode(), dto.getPhoneNumber())) {
+            profileRepository.setStatusByUsername(GeneralStatus.ACTIVE, dto.getPhoneNumber());
+            return "Verification Successfully Completed!";
+        }
+        throw new AppBadException("Verification failed");
     }
 
+    @SneakyThrows
     public ProfileDTO login(AuthorizationDTO dto) {
-        return null;
+        Optional<ProfileEntity> dbEntity = profileRepository.findByUsernameAndVisibleIsTrue(dto.getUsername());
+
+        if (dbEntity.isPresent()) {
+            ProfileEntity profileEntity = dbEntity.get();
+            if (bCryptPasswordEncoder.matches(dto.getPassword(),profileEntity.getPassword())){
+                ProfileDTO response = new ProfileDTO();
+                response.setId(profileEntity.getId());
+                response.setName(profileEntity.getName());
+                response.setUsername(profileEntity.getUsername());
+                response.setRoleList(profileRoleService.getByProfileId(profileEntity.getId()));
+                response.setJwt(JwtUtil.encode(profileEntity.getUsername(), response.getRoleList()));
+                return response;
+            }
+        }
+        throw new AppBadException("Login failed");
     }
 }

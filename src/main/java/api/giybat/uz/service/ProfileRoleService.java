@@ -1,15 +1,18 @@
 package api.giybat.uz.service;
 
-import api.giybat.uz.entity.ProfileEntity;
-import api.giybat.uz.entity.ProfileRoleEntity;
+import api.giybat.uz.entity.profileEntities.ProfileEntity;
+import api.giybat.uz.entity.profileEntities.ProfileRoleEntity;
 import api.giybat.uz.enums.ProfileRole;
 import api.giybat.uz.exp.AppBadException;
 import api.giybat.uz.repository.ProfileRoleRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +35,9 @@ public class ProfileRoleService {
         profileRoleEntity.setRole(profileRole);
 
         profileRoleRepository.save(profileRoleEntity);
+    }
+
+    public ProfileRole getByProfileId(String id) {
+        return null;
     }
 }

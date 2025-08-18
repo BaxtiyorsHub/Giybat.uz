@@ -25,8 +25,9 @@ public class ProfileDTO {
     private String password;
 
     @NotEmpty(message = "Role bo‘sh bo‘lmasligi kerak")
-    private List<ProfileRole> roleList;
+    private ProfileRole roleList;
 
+    private String jwt;
     /*private AttachDTO photo;
     private LocalDateTime createdDate;
     private ProfileStatus status;
