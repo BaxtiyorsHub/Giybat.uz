@@ -32,9 +32,9 @@ public class AuthService {
     private final SmsHistoryService smsHistoryService;
 
     @SneakyThrows
-    public String registration(RegistrationDTO dto) {
+    public String registration(@Valid RegistrationDTO dto) {
         // check
-        if (!dto.getUsername().isBlank()) throw new AppBadException("Something went wrong");
+        if (dto.getUsername().isBlank()) throw new AppBadException("Something went wrong");
 
         Optional<ProfileEntity> existOptional = profileRepository.findByUsernameAndVisibleIsTrue(dto.getUsername());
         if (existOptional.isPresent()) {
@@ -49,15 +49,11 @@ public class AuthService {
         // create profile
         ProfileEntity profile = new ProfileEntity();
         profile.setName(dto.getName());
-        if (profile.getUsername().contains("@")) { // email va phone ga tekshirishni o'zgartirsa bo'ladi.
-            // Email Send
-            emailSenderService.sendRegistration(profile.getUsername());
-            profile.setUsername(dto.getUsername());
-        } else {
-            // SMS Send
-            smsSenderService.sendRegistrationSMS(profile.getUsername());
-            profile.setUsername(dto.getUsername());
-        }
+
+        if (dto.getUsername().contains("@")) emailSenderService.sendRegistration(dto.getUsername());
+        else smsSenderService.sendRegistrationSMS(dto.getUsername());
+
+        profile.setUsername(dto.getUsername());
         profile.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
         profile.setStatus(GeneralStatus.INACTIVE);
         profileRepository.save(profile);
@@ -110,7 +106,7 @@ public class AuthService {
 
         if (dbEntity.isPresent()) {
             ProfileEntity profileEntity = dbEntity.get();
-            if (bCryptPasswordEncoder.matches(dto.getPassword(),profileEntity.getPassword())){
+            if (bCryptPasswordEncoder.matches(dto.getPassword(), profileEntity.getPassword())) {
                 ProfileDTO response = new ProfileDTO();
                 response.setId(profileEntity.getId());
                 response.setName(profileEntity.getName());
