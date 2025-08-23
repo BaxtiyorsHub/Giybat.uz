@@ -5,6 +5,7 @@ import api.giybat.uz.dto.ProfileDTO;
 import api.giybat.uz.dto.RegistrationDTO;
 import api.giybat.uz.dto.SmsVerificationDTO;
 import api.giybat.uz.service.AuthService;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +18,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/registration")
+    @PermitAll
     public ResponseEntity<String> registration(@Valid @RequestBody RegistrationDTO dto) {
         return ResponseEntity.ok(authService.registration(dto));
     }
 
     @GetMapping("/email-verification/{token}")
-    public ResponseEntity<String> registration(@PathVariable("token") String token) {
+    public ResponseEntity<String> verification(@PathVariable("token") String token) {
         return ResponseEntity.ok(authService.emailVerification(token));
     }
 

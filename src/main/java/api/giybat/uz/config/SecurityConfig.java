@@ -28,13 +28,7 @@ public class SecurityConfig {
     private final CustomUserDetailService customUserDetailService;
 
     public static String[] OPEN_API_LIST = {
-            "/attach/**",
             "/api/v1/auth/**",
-            "/api/v1/attach/upload",
-            "/api/v1/attach/open/**",
-            "/api/v1/attach/download/**",
-            "/api/v1/category/lang",
-            "/api/v1/region/lang",
     };
 
     @Bean
@@ -52,8 +46,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(OPEN_API_LIST).permitAll()
-                        .requestMatchers("/api/auth/**").permitAll() // login/register ochiq
-                        .anyRequest().authenticated()               // qolganlari uchun token kerak
+                        .anyRequest()
+                        .authenticated()               // qolganlari uchun token kerak
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
