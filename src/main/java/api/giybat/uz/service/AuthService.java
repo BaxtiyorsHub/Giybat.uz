@@ -118,4 +118,12 @@ public class AuthService {
         }
         throw new AppBadException("Login failed");
     }
+
+    public Optional<ProfileDTO> resetPassword(@Valid String username) {
+        return null;
+    }
+
+    public ProfileDTO resetPass(@Valid AuthorizationDTO dto) {
+        return null;
+    }
 }
