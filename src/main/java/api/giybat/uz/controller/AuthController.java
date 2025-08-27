@@ -41,12 +41,12 @@ public class AuthController {
     }
 
     @GetMapping("/reset-password")
-    public ResponseEntity<Optional<ProfileDTO>> resetPassword(@Valid @RequestParam String username) {
+    public ResponseEntity<ProfileDTO> resetPassword(@Valid @RequestParam String username) {
         return ResponseEntity.ok(authService.resetPassword(username));
     }
 
     @PutMapping("/reset-password")
     public ResponseEntity<ProfileDTO> resetPassword(@Valid @RequestBody AuthorizationDTO dto) {
-        return ResponseEntity.ok(authService.resetPass(dto));
+        return ResponseEntity.ok(authService.resetConfirm(dto));
     }
 }

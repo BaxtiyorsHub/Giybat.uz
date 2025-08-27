@@ -11,6 +11,7 @@ import api.giybat.uz.service.emailServices.EmailSenderService;
 import api.giybat.uz.service.smsServices.SmsHistoryService;
 import api.giybat.uz.utils.JwtUtil;
 import api.giybat.uz.utils.PhoneCheck;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -107,23 +108,43 @@ public class AuthService {
         if (dbEntity.isPresent()) {
             ProfileEntity profileEntity = dbEntity.get();
             if (bCryptPasswordEncoder.matches(dto.getPassword(), profileEntity.getPassword())) {
-                ProfileDTO response = new ProfileDTO();
-                response.setId(profileEntity.getId());
-                response.setName(profileEntity.getName());
-                response.setUsername(profileEntity.getUsername());
-                response.setRoleList(profileRoleService.getByProfileId(profileEntity.getId()));
-                response.setJwt(JwtUtil.encode(profileEntity.getUsername(), response.getRoleList()));
-                return response;
+                return toDTO(profileEntity);
             }
         }
         throw new AppBadException("Login failed");
     }
 
-    public Optional<ProfileDTO> resetPassword(@Valid String username) {
-        return null;
+    @SneakyThrows
+    @Transactional
+    public ProfileDTO resetPassword(@Valid String username) {
+        return (ProfileDTO) profileRepository.findByUsernameAndVisibleIsTrue(username)
+                .stream()
+                .map(this::toDTO);
     }
 
-    public ProfileDTO resetPass(@Valid AuthorizationDTO dto) {
-        return null;
+    private ProfileDTO toDTO(ProfileEntity profileEntity) {
+        ProfileDTO response = new ProfileDTO();
+        response.setId(profileEntity.getId());
+        response.setName(profileEntity.getName());
+        response.setUsername(profileEntity.getUsername());
+        response.setRoleList(profileRoleService.getByProfileId(profileEntity.getId()));
+        response.setJwt(JwtUtil.encode(profileEntity.getUsername(), response.getRoleList()));
+        return response;
+    }
+
+    private Optional<ProfileEntity> getEntityFromDB(String username) {
+        return profileRepository.findByUsernameAndVisibleIsTrue(username);
+    }
+
+    @SneakyThrows
+    public ProfileDTO resetConfirm(@Valid AuthorizationDTO dto) {
+        Optional<ProfileEntity> entityFromDB = getEntityFromDB(dto.getUsername());
+
+        if (entityFromDB.isPresent()) {
+            entityFromDB.get().setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+            profileRepository.save(entityFromDB.get());
+            return toDTO(entityFromDB.get());
+        }
+        throw new AppBadException("Confirmation failed");
     }
 }
