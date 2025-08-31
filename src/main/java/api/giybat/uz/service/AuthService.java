@@ -34,7 +34,7 @@ public class AuthService {
 
     @SneakyThrows
     public String registration(@Valid RegistrationDTO dto) {
-        // check
+
         if (dto.getUsername().isBlank()) throw new AppBadException("Something went wrong");
 
         Optional<ProfileEntity> existOptional = profileRepository.findByUsernameAndVisibleIsTrue(dto.getUsername());
@@ -51,31 +51,28 @@ public class AuthService {
         ProfileEntity profile = new ProfileEntity();
         profile.setName(dto.getName());
 
-        if (dto.getUsername().contains("@")) emailSenderService.sendRegistration(dto.getUsername());
-        else smsSenderService.sendRegistrationSMS(dto.getUsername());
+        if (dto.getUsername().contains("@")) {
+            emailSenderService.sendRegistration(dto.getUsername());
+            profile.setUsername(dto.getUsername());
+        } else if (PhoneCheck.normalize(dto.getUsername()).startsWith("+998")) {
+            String phone = PhoneCheck.normalize(dto.getUsername());
+            smsSenderService.sendRegistrationSMS(phone);
+            profile.setUsername(phone);
+        }
 
-        profile.setUsername(dto.getUsername());
         profile.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
         profile.setStatus(GeneralStatus.INACTIVE);
         profileRepository.save(profile);
         // create profile roles
         profileRoleService.create(profile, ProfileRole.USER);
-        // send verification code
-        if (profile.getUsername().contains("@")) { // email va phone ga tekshirishni o'zgartirsa bo'ladi.
-            // Email Send
-            return emailSenderService.sendRegistration(profile.getUsername());
-        } else if (PhoneCheck.normalize(dto.getUsername()).startsWith("+998")) {
-            // SMS Send
-            return smsSenderService.sendRegistrationSMS(profile.getUsername());
-        }
-        throw new AppBadException("Something went wrong");
+        return "Verification code sent";
     }
 
     @SneakyThrows
     public String emailVerification(String token) {
         if (token.isBlank()) throw new AppBadException("Wrong token, something went wrong");
 
-        JwtDTO jwtDTO = JwtUtil.decode(token);
+        JwtDTO jwtDTO = JwtUtil.decodeRegistrationToken(token);
 
         Optional<ProfileEntity> dbEntity = profileRepository.findByUsernameAndVisibleIsTrue(jwtDTO.getUsername());
 

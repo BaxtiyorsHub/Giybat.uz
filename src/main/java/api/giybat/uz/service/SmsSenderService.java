@@ -5,8 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SmsSenderService {
 
-    public String sendRegistrationSMS(String username) {
+    public void sendRegistrationSMS(String username) {
 
-        return "Verification code sent";
     }
 }

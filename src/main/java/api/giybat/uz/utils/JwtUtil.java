@@ -22,9 +22,10 @@ public class JwtUtil {
     /**
      * General
      */
-    public static String encode(String username, ProfileRole role) {
+    public static String encode(String username, ProfileRole role) { // [ROLE_ADMIN,ROLE_USER]
         Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", role.name());
+        extraClaims.put("username", username);
+        extraClaims.put("role", role);
 
         return Jwts
                 .builder()
@@ -32,30 +33,27 @@ public class JwtUtil {
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + tokenLiveTime))
-                .signWith(getSignKey())
+                .signWith(getSignInKey())
                 .compact();
     }
 
-    /**
-     * Token decode qilish (JWT dan username va rolni olish)
-     */
     public static JwtDTO decode(String token) {
         Claims claims = Jwts
                 .parser()
-                .verifyWith(getSignKey())
+                .verifyWith(getSignInKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-
         String username = claims.getSubject();
-        String roleStr = (String) claims.get("role");
-        ProfileRole role = ProfileRole.valueOf(roleStr);
-
-        return new JwtDTO(username, claims.get("code").toString(), role);
+        ProfileRole role = (ProfileRole) claims.get("role");
+        JwtDTO jwtDTO = new JwtDTO();
+        jwtDTO.setUsername(username);
+        jwtDTO.setRole(role);
+        return jwtDTO;
     }
 
     /**
-     * Ro'yxatdan o'tish tokeni
+     * Registration
      */
     public static String encodeForRegistration(String username, String code) {
         Map<String, Object> extraClaims = new HashMap<>();
@@ -67,17 +65,14 @@ public class JwtUtil {
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + tokenLiveTime))
-                .signWith(getSignKey(), Jwts.SIG.HS256)
+                .signWith(getSignInKey())
                 .compact();
     }
 
-    /**
-     * Ro'yxatdan o'tish tokenini ochish
-     */
     public static JwtDTO decodeRegistrationToken(String token) {
         Claims claims = Jwts
                 .parser()
-                .verifyWith(getSignKey())
+                .verifyWith(getSignInKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -88,7 +83,7 @@ public class JwtUtil {
     public static boolean isTokenExpired(String token) {
         return Jwts
                 .parser()
-                .verifyWith(getSignKey())
+                .verifyWith(getSignInKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
@@ -96,26 +91,8 @@ public class JwtUtil {
                 .after(new Date());
     }
 
-    public static String refreshToken(String phone, String role) {
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("role", role);
-
-        return Jwts
-                .builder()
-                .claims(extraClaims)
-                .subject(phone)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + refreshTokenLiveTime))
-                .signWith(getSignKey())
-                .compact();
-    }
-
-    /**
-     * Kalitni olish (256 bitli kalit)
-     */
-    private static SecretKey getSignKey() {
+    private static SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
 }

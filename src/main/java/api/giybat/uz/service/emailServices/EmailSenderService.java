@@ -23,7 +23,7 @@ public class EmailSenderService {
     private final JavaMailSender javaMailSender;
     private final EmailHistoryService emailHistoryService;
 
-    public String sendRegistration(String toAccount) {
+    public void sendRegistration(String toAccount) {
         int smsCode = RandomUtil.fiveDigit();
         String body = "<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
@@ -54,8 +54,6 @@ public class EmailSenderService {
         sendMimeMessage(body, toAccount);
         // save to db
         emailHistoryService.create(body, String.valueOf(smsCode), toAccount);
-
-        return "Registration code sent";
     }
 
     private void sendMimeMessage(String body, String toAccount) {

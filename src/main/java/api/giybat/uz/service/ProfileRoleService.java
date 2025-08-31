@@ -21,7 +21,7 @@ public class ProfileRoleService {
     private final ProfileRoleRepository profileRoleRepository;
 
     public void deleteRolesByProfileId(String id) {
-        if (!id.isBlank()) profileRoleRepository.deleteById(id);
+        if (!id.isBlank()) profileRoleRepository.deleteByProfileId(id);
     }
 
     @SneakyThrows
