@@ -22,6 +22,7 @@ public class EmailSenderService {
     private String serverURL;
     private final JavaMailSender javaMailSender;
     private final EmailHistoryService emailHistoryService;
+    private final JwtUtil jwtUtil;
 
     public void sendRegistration(String toAccount) {
         int smsCode = RandomUtil.fiveDigit();
@@ -48,7 +49,7 @@ public class EmailSenderService {
                 "\n" +
                 "</body>\n" +
                 "</html>";
-        String jwtToken = JwtUtil.encodeForRegistration(toAccount, String.valueOf(smsCode));
+        String jwtToken = jwtUtil.encodeForRegistration(toAccount, String.valueOf(smsCode));
         body = String.format(body, serverURL, jwtToken);
         // send
         sendMimeMessage(body, toAccount);

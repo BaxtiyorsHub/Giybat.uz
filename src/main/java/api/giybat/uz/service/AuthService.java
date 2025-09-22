@@ -31,6 +31,7 @@ public class AuthService {
     private final SmsSenderService smsSenderService;
     private final EmailHistoryService emailHistoryService;
     private final SmsHistoryService smsHistoryService;
+    private final JwtUtil jwtUtil;
 
     @SneakyThrows
     public String registration(@Valid RegistrationDTO dto) {
@@ -72,7 +73,7 @@ public class AuthService {
     public String emailVerification(String token) {
         if (token.isBlank()) throw new AppBadException("Wrong token, something went wrong");
 
-        JwtDTO jwtDTO = JwtUtil.decodeRegistrationToken(token);
+        JwtDTO jwtDTO = jwtUtil.decodeRegistrationToken(token);
 
         Optional<ProfileEntity> dbEntity = profileRepository.findByUsernameAndVisibleIsTrue(jwtDTO.getUsername());
 
@@ -125,7 +126,7 @@ public class AuthService {
         response.setName(profileEntity.getName());
         response.setUsername(profileEntity.getUsername());
         response.setRoleList(profileRoleService.getByProfileId(profileEntity.getId()));
-        response.setJwt(JwtUtil.encode(profileEntity.getUsername(), response.getRoleList()));
+        response.setJwt(jwtUtil.encode(profileEntity.getUsername(), response.getRoleList()));
         return response;
     }
 

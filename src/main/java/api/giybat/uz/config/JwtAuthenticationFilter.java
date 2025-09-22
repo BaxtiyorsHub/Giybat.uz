@@ -25,6 +25,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private final JwtUtil jwtUtil;
     private final CustomUserDetailService customUserDetailService;
 
     @Override
@@ -47,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String token = header.substring(7).trim();
-            JwtDTO jwtDTO = JwtUtil.decode(token);
+            JwtDTO jwtDTO = jwtUtil.decode(token);
 
             String username = jwtDTO.getUsername();
             UserDetails userDetails = customUserDetailService.loadUserByUsername(username);

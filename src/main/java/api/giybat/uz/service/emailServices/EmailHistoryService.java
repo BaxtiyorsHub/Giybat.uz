@@ -15,7 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EmailHistoryService {
 
-    private EmailHistoryRepository emailHistoryRepository;
+    private final EmailHistoryRepository emailHistoryRepository;
 
     @Transactional
     public void create(String body, String smsCode, String toAccount) {

@@ -7,22 +7,25 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class JwtUtil {
     private static final int tokenLiveTime = 1000 * 3600 * 24; // 1-day
     private static final long refreshTokenLiveTime = 1000L * 3600 * 24 * 30; // 30-days
     @Value("${jwt.secretKey}")
-    private static String secretKey;
+    private String secretKey;
+    //private static final String secretKey = "akfjvadvsgdsg124iohubf891h28ufyjblhgfiqu17g8uibhj=";
 
     /**
      * General
      */
-    public static String encode(String username, ProfileRole role) { // [ROLE_ADMIN,ROLE_USER]
+    public String encode(String username, ProfileRole role) { // [ROLE_ADMIN,ROLE_USER]
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("username", username);
         extraClaims.put("role", role);
@@ -37,7 +40,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public static JwtDTO decode(String token) {
+    public JwtDTO decode(String token) {
         Claims claims = Jwts
                 .parser()
                 .verifyWith(getSignInKey())
@@ -55,7 +58,7 @@ public class JwtUtil {
     /**
      * Registration
      */
-    public static String encodeForRegistration(String username, String code) {
+    public String encodeForRegistration(String username, String code) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("code", code);
 
@@ -69,7 +72,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public static JwtDTO decodeRegistrationToken(String token) {
+    public JwtDTO decodeRegistrationToken(String token) {
         Claims claims = Jwts
                 .parser()
                 .verifyWith(getSignInKey())
@@ -80,7 +83,7 @@ public class JwtUtil {
         return new JwtDTO(claims.getSubject(), claims.get("code").toString());
     }
 
-    public static boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return Jwts
                 .parser()
                 .verifyWith(getSignInKey())
@@ -91,7 +94,7 @@ public class JwtUtil {
                 .after(new Date());
     }
 
-    private static SecretKey getSignInKey() {
+    private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
