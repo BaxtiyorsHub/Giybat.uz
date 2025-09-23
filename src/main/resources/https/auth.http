@@ -8,6 +8,35 @@ Content-Type: application/json
 
 {
   "name": "Baxtiyor",
+  "username": "900641092",
+  "password": "123"
+}
+
+### Sms verification
+PUT localhost:8080/api/v1/auth/sms-verification
+Content-Type: application/json
+
+{
+  "phoneNumber": "900641092",
+  "smsCode": "1234"
+}
+
+### Login
+POST localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
   "username": "baxtiyorking17@gmail.com",
   "password": "123"
 }
+
+### Get acc to reset pass
+GET localhost:8080/api/v1/auth/reset-password
+Content-Type: application/json
+
+{
+  "username": "baxtiyorking17@gmail.com"
+}
+
+### Reset pass
+PUT localhost:8080/api/v1/auth/reset-password

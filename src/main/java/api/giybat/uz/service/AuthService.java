@@ -9,6 +9,7 @@ import api.giybat.uz.repository.ProfileRepository;
 import api.giybat.uz.service.emailServices.EmailHistoryService;
 import api.giybat.uz.service.emailServices.EmailSenderService;
 import api.giybat.uz.service.smsServices.SmsHistoryService;
+import api.giybat.uz.service.smsServices.SmsSenderService;
 import api.giybat.uz.utils.JwtUtil;
 import api.giybat.uz.utils.PhoneCheck;
 import jakarta.transaction.Transactional;
@@ -34,6 +35,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     @SneakyThrows
+    @Transactional
     public String registration(@Valid RegistrationDTO dto) {
 
         if (dto.getUsername().isBlank()) throw new AppBadException("Something went wrong");

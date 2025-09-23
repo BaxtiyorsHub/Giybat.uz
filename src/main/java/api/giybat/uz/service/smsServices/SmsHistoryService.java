@@ -19,7 +19,6 @@ public class SmsHistoryService {
 
     public boolean isValidSms(@NotBlank String smsCode, @NotBlank String phoneNumber) {
         SmsHistoryEntity smsByPhone = getSmsByPhone(phoneNumber);
-
         // check time
         if (LocalDateTime.now().isAfter(smsByPhone.getCreatedDate().plusMinutes(1))) return false;
 
@@ -44,4 +43,7 @@ public class SmsHistoryService {
                 .orElseThrow(() -> new RuntimeException("Sms not found for phone: " + phoneNumber));
     }
 
+    public void save(String phoneNumber, int code) {
+
+    }
 }
