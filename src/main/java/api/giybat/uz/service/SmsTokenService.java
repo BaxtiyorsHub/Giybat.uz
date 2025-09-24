@@ -1,6 +1,6 @@
 package api.giybat.uz.service;
 
-import api.giybat.uz.config.RestTemplate;
+import api.giybat.uz.config.RestTemplateConfig;
 import api.giybat.uz.dto.SmsProviderTokenDTO;
 import api.giybat.uz.dto.SmsTokenProviderResponse;
 import api.giybat.uz.entity.SmsTokenEntity;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ public class SmsTokenService {
     @Value("${sms.eskiz.password}")
     private String password;
 
-    private String token = "https://notify.eskiz.uz/api/";
+    private final String token = "https://notify.eskiz.uz/api/";
 
     public String getToken() {
         Optional<SmsTokenEntity> optional = smsTokenRepository.findTopByOrderByCreatedDateDesc();
@@ -65,15 +66,8 @@ public class SmsTokenService {
                 .headers(headers)
                 .body(smsProviderTokenDTO);
 
-        var response = restTemplate.exchange(request, SmsTokenProviderResponse.class);
-        String token = response.getBody().getData().getToken();
-
-        SmsTokenEntity entity = new SmsTokenEntity();
-        entity.setToken(token);
-        entity.setCreatedDate(LocalDateTime.now());
-        repository.save(entity);
-
-        return token;
+        var response = restTemplate.exchange(request, SmsTokenProviderResponse.class).getBody().getData().getToken();
+        return saveToken(response);
     }
 
     public String refreshToken(String oldToken) {
@@ -86,18 +80,15 @@ public class SmsTokenService {
                 .headers(headers)
                 .build();
 
-        var response = restTemplate.exchange(request, SmsTokenProviderResponse.class);
-        String newToken = response.getBody().getData().getToken();
-
-        SmsTokenEntity entity = new SmsTokenEntity();
-        entity.setToken(newToken);
-        entity.setCreatedDate(LocalDateTime.now());
-        repository.save(entity);
-
-        return newToken;
+        var response = restTemplate.exchange(request, SmsTokenProviderResponse.class).getBody().getData().getToken();
+        return saveToken(response);
     }
 
-    private Var restExchange(RequestEntity<Void> request, SmsTokenProviderResponse response) {
-
+    private String saveToken(String token) {
+        SmsTokenEntity entity = new SmsTokenEntity();
+        entity.setToken(token);
+        entity.setCreatedDate(LocalDateTime.now());
+        smsTokenRepository.save(entity);
+        return token;
     }
 }
